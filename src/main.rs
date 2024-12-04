@@ -99,7 +99,12 @@ impl Game {
             let cell = self.grid_current.get_mut(Game::coords_to_index(pos));
             match cell {
                 None => {}
-                Some(x) => x.state = CellState::Live,
+                Some(x) => {
+                    x.state = match x.state {
+                        CellState::Dead => CellState::Live,
+                        CellState::Live => CellState::Dead,
+                    };
+                }
             }
         }
         if self.paused == true {
@@ -121,8 +126,6 @@ impl Game {
                 };
                 let c: Cell = Cell {
                     state: cell_pos.state.process(self.get_neighbours(cell_pos)),
-                    // state: cell_pos.state.process((rand::rand() % 8) as u8),
-                    // state: CellState::Dead,
                     pos: cell_pos.pos,
                 };
                 grid_next_frame.push(c);

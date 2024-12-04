@@ -84,14 +84,22 @@ impl Game {
     }
 
     fn run(&mut self) {
+        draw_text(
+            format!("{}, {}", mouse_position().0, mouse_position().1).as_str(),
+            500f32,
+            600f32,
+            30f32,
+            BLACK,
+        );
         if is_mouse_button_pressed(MouseButton::Right) {
             self.paused = !self.paused;
         }
         if is_mouse_button_pressed(MouseButton::Left) {
             let pos = mouse_position();
-            let cell = self
-                .grid_current
-                .get_mut((pos.1 / CELL_SIZE + pos.0) as usize);
+            let cell = self.grid_current.get_mut(
+                ((pos.0 / CELL_SIZE).floor() * GRID_SIZE as f32 + (pos.1 / CELL_SIZE).floor())
+                    as usize,
+            );
             match cell {
                 None => {}
                 Some(x) => x.state = CellState::Live,
@@ -143,7 +151,7 @@ async fn main() {
         game.run();
         game.draw();
         println!("FPS: {:.1}", get_fps());
-        thread::sleep(time::Duration::from_millis(15));
+        thread::sleep(time::Duration::from_millis(100));
         next_frame().await
     }
 }

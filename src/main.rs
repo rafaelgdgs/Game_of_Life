@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use macroquad::prelude::*;
 use std::{thread, time};
 
@@ -185,6 +187,16 @@ impl Draw for Game {
     }
 }
 
+fn draw_fps() {
+    draw_text(
+        format!("FPS: {}", get_fps()).as_str(),
+        700f32,
+        30f32,
+        30f32,
+        BLACK,
+    );
+}
+
 #[macroquad::main("Game of Life")]
 async fn main() {
     let mut game = Game::new();
@@ -192,7 +204,7 @@ async fn main() {
         clear_background(WHITE);
         game.run();
         game.draw();
-        println!("FPS: {:.1}", get_fps());
+        draw_fps();
         thread::sleep(time::Duration::from_millis(100));
         next_frame().await
     }

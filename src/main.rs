@@ -154,6 +154,13 @@ impl Game {
         ];
 
         for shift in shifts {
+            if coords.x + shift.0 as f32 > GRID_SIZE as f32 * CELL_SIZE
+                || (coords.x + shift.0 as f32) < 0f32
+                || coords.y + shift.1 as f32 > GRID_SIZE as f32 * CELL_SIZE
+                || (coords.y + shift.1 as f32) < 0f32
+            {
+                continue;
+            }
             match self.grid_current.get(Game::coords_to_index((
                 coords.x + shift.0 as f32,
                 coords.y + shift.1 as f32,

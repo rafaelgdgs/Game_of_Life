@@ -109,6 +109,10 @@ impl Game {
             draw_text("PAUSED", 500f32, 500f32, 30f32, BLACK);
             return;
         }
+        self.compute_tick();
+    }
+
+    fn compute_tick(&mut self) {
         let mut grid_next_frame: Vec<Cell> = Vec::new();
         for line in 0..GRID_SIZE {
             for column in 0..GRID_SIZE {

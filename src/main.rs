@@ -6,13 +6,14 @@ use std::{thread, time};
 // if LIVE and neighbours > 3 = DIE
 // if DEAD and neighbours == 3 = LIVE
 
-const GRID_SIZE: usize = 30;
+const GRID_SIZE: usize = 40;
 const CELL_SIZE: f32 = 10f32;
 
 trait Draw {
     fn draw(&self);
 }
 
+#[derive(PartialEq)]
 enum CellState {
     Live,
     Dead,
@@ -53,7 +54,6 @@ impl Draw for Cell {
             GRAY,
         );
         draw_rectangle(self.pos.x, self.pos.y, CELL_SIZE, CELL_SIZE, color);
-        // draw_rectangle_lines(x, y, w, h, thickness, color);
     }
 }
 
@@ -70,8 +70,8 @@ impl Game {
                 let cell = Cell {
                     state: CellState::Dead,
                     pos: Vec2 {
-                        x: (i * 10) as f32,
-                        y: (j * 10) as f32,
+                        x: (j * 10) as f32,
+                        y: (i * 10) as f32,
                     },
                 };
                 grid.push(cell);
@@ -96,10 +96,7 @@ impl Game {
         }
         if is_mouse_button_pressed(MouseButton::Left) {
             let pos = mouse_position();
-            let cell = self.grid_current.get_mut(
-                ((pos.0 / CELL_SIZE).floor() * GRID_SIZE as f32 + (pos.1 / CELL_SIZE).floor())
-                    as usize,
-            );
+            let cell = self.grid_current.get_mut(Game::coords_to_index(pos));
             match cell {
                 None => {}
                 Some(x) => x.state = CellState::Live,
@@ -116,16 +113,17 @@ impl Game {
         let mut grid_next_frame: Vec<Cell> = Vec::new();
         for line in 0..GRID_SIZE {
             for column in 0..GRID_SIZE {
-                let cell_pos: Vec2 = match self.grid_current.get(line * GRID_SIZE + column) {
+                let cell_pos = match self.grid_current.get(line * GRID_SIZE + column) {
                     None => {
                         continue;
                     }
-                    Some(v) => v.pos.clone(),
+                    Some(v) => v,
                 };
                 let c: Cell = Cell {
-                    // state: cell.state.process(get_neighbours(cell)),
-                    state: CellState::Dead,
-                    pos: cell_pos,
+                    state: cell_pos.state.process(self.get_neighbours(cell_pos)),
+                    // state: cell_pos.state.process((rand::rand() % 8) as u8),
+                    // state: CellState::Dead,
+                    pos: cell_pos.pos,
                 };
                 grid_next_frame.push(c);
             }
@@ -133,9 +131,40 @@ impl Game {
         self.grid_current = grid_next_frame;
     }
 
-    // fn get_neighbours(&self, cell: &Cell) -> u8 {
-    //     if self.grid_current[0] {}
-    // }
+    fn coords_to_index(coords: (f32, f32)) -> usize {
+        ((coords.1 / CELL_SIZE).floor() * GRID_SIZE as f32 + (coords.0 / CELL_SIZE).floor())
+            as usize
+    }
+
+    fn get_neighbours(&self, cell: &Cell) -> u8 {
+        let coords = cell.pos;
+        let mut neighbours_count: u8 = 0;
+        let shifts: [(i32, i32); 8] = [
+            (10, 0),
+            (10, 10),
+            (0, 10),
+            (-10, 10),
+            (-10, 0),
+            (-10, -10),
+            (0, -10),
+            (10, -10),
+        ];
+
+        for shift in shifts {
+            match self.grid_current.get(Game::coords_to_index((
+                coords.x + shift.0 as f32,
+                coords.y + shift.1 as f32,
+            ))) {
+                None => {}
+                Some(c) => {
+                    if c.state == CellState::Live {
+                        neighbours_count += 1
+                    }
+                }
+            }
+        }
+        neighbours_count
+    }
 }
 
 impl Draw for Game {

@@ -154,10 +154,10 @@ impl Game {
         ];
 
         for shift in shifts {
-            if coords.x + shift.0 as f32 > GRID_SIZE as f32 * CELL_SIZE
-                || (coords.x + shift.0 as f32) < 0f32
-                || coords.y + shift.1 as f32 > GRID_SIZE as f32 * CELL_SIZE
-                || (coords.y + shift.1 as f32) < 0f32
+            if coords.x + shift.0 as f32 >= GRID_SIZE as f32 * CELL_SIZE
+                || (coords.x + shift.0 as f32) <= 0f32
+                || coords.y + shift.1 as f32 >= GRID_SIZE as f32 * CELL_SIZE
+                || (coords.y + shift.1 as f32) <= 0f32
             {
                 continue;
             }
@@ -187,7 +187,6 @@ impl Draw for Game {
 
 #[macroquad::main("Game of Life")]
 async fn main() {
-    println!("Hello, world!");
     let mut game = Game::new();
     loop {
         clear_background(WHITE);

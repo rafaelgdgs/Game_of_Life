@@ -111,12 +111,14 @@ impl Game {
         }
         if self.paused == true {
             draw_text("PAUSED", 500f32, 500f32, 30f32, BLACK);
-            return;
         }
-        self.compute_tick();
+        // self.compute_tick();
     }
 
     fn compute_tick(&mut self) {
+        if self.paused == true {
+            return;
+        }
         let mut grid_next_frame: Vec<Cell> = Vec::new();
         for line in 0..GRID_SIZE {
             for column in 0..GRID_SIZE {
@@ -200,12 +202,21 @@ fn draw_fps() {
 #[macroquad::main("Game of Life")]
 async fn main() {
     let mut game = Game::new();
+    let fps = 1f64 / 3f64;
+    let mut last_run_time = get_time();
+    let mut loop_time: f64 = last_run_time;
     loop {
+        if loop_time - last_run_time > fps {
+            last_run_time = get_time();
+            game.compute_tick();
+        }
+        loop_time = get_time();
+
         clear_background(WHITE);
         game.run();
         game.draw();
         draw_fps();
-        thread::sleep(time::Duration::from_millis(100));
+        // thread::sleep(time::Duration::from_millis(100));
         next_frame().await
     }
 }
